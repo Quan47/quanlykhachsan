@@ -68,11 +68,18 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
             const accountRepository = await AppDataSource.getRepository(Account);
             const account = await accountRepository.findOne({
                 where: {
-                    Id: verified?.id
+                    Id: verified?.id ?? null
                 }
             })
-            req['user'] = account;
-            next();
+            if (!account)
+                // Account is deleted after login
+                res.status(401).json({
+                    message: 'Unauthorized'
+                })
+            else {
+                req['user'] = account;
+                next();
+            }
         }
 
     } catch (error) {
