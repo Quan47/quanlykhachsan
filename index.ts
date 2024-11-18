@@ -8,6 +8,7 @@ import session from "express-session";
 import { initPassportStrategy } from './src/middleware/authentication/auth.strategy';
 import { renterRouter } from './src/routers/renter.router';
 import { billRouter } from './src/routers/bill.router';
+import { InitDefaultDataBase } from './src/service/init-default-database.service';
 dotenv.config();
 
 const app = express();
@@ -32,7 +33,9 @@ app.get('/', (req: Request, res: Response) => {
 
 AppDataSource.initialize()
   .then(async () => {
-    app.listen(port, () => {
+    app.listen(port, async() => {
+      // init default database
+      await InitDefaultDataBase.initDataTable()
       console.log("Server is running on http://localhost:" + port);
     });
     console.log("Data Source has been initialized!");
