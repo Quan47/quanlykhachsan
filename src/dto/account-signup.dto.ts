@@ -18,10 +18,15 @@ export class AccountSignUpDto {
     @IsEnum(RoleID)
     role: RoleID;
 
-    constructor(fullName: string, phone: string, password: string, role: RoleID){
+    @IsOptional()
+    @IsString()
+    areaId: string;
+
+    constructor(fullName: string, phone: string, password: string, role: RoleID, areaId?: string){
         this.fullName = fullName;
         this.password = password;
         this.phone = phone;
         this.role = role;
+        this.areaId = areaId;
     }
 }

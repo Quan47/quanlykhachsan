@@ -1,6 +1,6 @@
 import { RoleID } from "../interface/account.interface";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Role } from "./role.entity";
+import { Column, Entity, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Area } from "./area.entity";
 
 @Entity({ name: 'account' })
 export class Account {
@@ -19,6 +19,10 @@ export class Account {
     @Column()
     role: RoleID;
 
-    @Column({ default: true })
+    @Column()
     active: boolean;
+
+    @ManyToMany(() => Area) // Using for Le Tan (LT will work on the block of building)
+    @JoinTable()
+    areas?: Area[];
 }

@@ -40,7 +40,7 @@ export class RoomService {
                         where: {
                             Id: i.areaId
                         }
-                    })),
+                    }))?.name,
                     roomType: (await roomTypeRepository.findOne({
                         where: {
                             Id: i.typeId

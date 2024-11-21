@@ -69,6 +69,9 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
             const account = await accountRepository.findOne({
                 where: {
                     Id: verified?.id ?? null
+                },
+                relations: {
+                    areas: true
                 }
             })
             if (!account)
