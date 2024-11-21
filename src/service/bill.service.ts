@@ -1,7 +1,7 @@
 import { AppDataSource } from "../database";
 import { Bill } from "../model/bill.entity";
 import { Renter } from "../model/renter.entity";
-import { In } from "typeorm";
+import { Between, In, Like } from "typeorm";
 import { Room } from "../model/room.entity";
 
 export class BillService {
@@ -23,7 +23,6 @@ export class BillService {
                     type: true
                 }
             });
-
             const bill = new Bill();
             bill.inDay = new Date(payload?.inDay);
             bill.outDay = payload?.outDay ? new Date(payload.outDay) : new Date();
@@ -31,7 +30,6 @@ export class BillService {
             bill.roomId = payload.roomId;
             bill.renters = renters;
             bill.note = payload?.note ?? '';
-            // console.log(bill);
             const billRepository = await AppDataSource.getRepository(Bill);
             const billSaved = await billRepository.save(bill);
             return billSaved;
@@ -42,11 +40,32 @@ export class BillService {
         }
     }
 
-    static async getAllBill(){
+    static async getAllBill(payload?: any) {
         try {
             console.log(`${BillService.name} - getAllBill - started`);
+            let option = {};
+            if (payload?.area) {
+                option = {
+                    'roomId': Like(`${payload.area}%`)
+                };
+            }
+            if (payload?.filter) {
+                let start, end;
+                if (payload?.month) {
+                    const year = new Date().getFullYear();
+                    start = new Date(year, Number(payload.month) - 1, 1);
+                    end = new Date(year, Number(payload.month), 0); 
+                }
+                if(payload?.year){
+                    start = new Date(payload.year, 0, 1);
+                    end = new Date(payload.year, 11, 31, 23, 59, 59, 999); 
+                }
+                option['inDay'] = Between(start, end);
+                option['outDay'] = Between(start, end)
+            }
             const billRepository = await AppDataSource.getRepository(Bill);
             const bills = await billRepository.find({
+                where: { ...option },
                 relations: {
                     renters: true
                 }

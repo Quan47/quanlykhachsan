@@ -1,6 +1,7 @@
 import { plainToClass } from "class-transformer";
 import { validate } from "class-validator";
 import { Request, Response } from "express";
+import { BillFilterDto } from "../dto/bill-filtering.dto";
 import { BillCreationDto } from "../dto/bill-creation.dto";
 import { BillService } from "../service/bill.service";
 
@@ -39,14 +40,31 @@ export class BillController {
         }
     }
 
-    static async getAllBill(req: Request, res: Response){
+    static async getAllBill(req: Request, res: Response) {
         try {
             console.log(`${BillController.name} - getAllBill - started`);
-            const bills = await BillService.getAllBill();
-            res.status(200).json({
-                message: `Get all bill successfully`,
-                bills
-            })
+            const query = req.query;
+            const errors = await validate(plainToClass(BillFilterDto, query));
+            if (errors && errors.length > 0) {
+                console.error(errors);
+                res
+                    .status(400)
+                    .json({
+                        errors: errors?.map((error: any) => ({
+                            property: error?.property,
+                            value: error?.value,
+                            constraints: error?.constraints
+                        })) ?? "Missing required parameters"
+                    })
+            } else {
+                const { filter, month, year, area } = req.query;
+                const bills = await BillService.getAllBill({ filter, month, year, area });
+                res.status(200).json({
+                    message: `Get all bill successfully`,
+                    bills
+                })
+            }
+
         } catch (error) {
             console.error(`${BillController.name} - getAllBill - Error: ${error}`);
             res
