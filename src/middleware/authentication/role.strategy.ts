@@ -11,12 +11,27 @@ export const isRole = (roles: string[]) => {
                 Id: account.Id
             }
         })).role;
-        if(roles.includes(role))
+        if (roles.includes(role))
             next();
         else {
             res.status(403).json({
                 message: `Access denied`
             })
         }
+    }
+}
+
+export const isLTRoleRoom = () => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const account = req['user'];
+        const roomId = req.params['roomId'];
+        // Check area from account & area in the room id
+        if (account?.areas[0].Id !== roomId.split('-')[0]) {
+            res.status(403).json({
+                message: `Access denied`
+            })
+        }
+        else
+            next();
     }
 }

@@ -3,6 +3,7 @@ import { AppDataSource } from "../database";
 import { encrypt } from "../common/helpers";
 import { IAccount, RoleID } from "../interface/account.interface";
 import { Role } from "../model/role.entity";
+import { Area } from "../model/area.entity";
 
 
 export class AccountService {
@@ -16,12 +17,21 @@ export class AccountService {
                 where: {
                     Id: payload?.role
                 }
-            })
+            });
             const account = new Account();
             account.fullName = payload?.fullName;
             account.phone = payload?.phone;
             account.password = passwordEncrypted;
             account.role = RoleID[role.Id];
+            if (role.Id === RoleID.LT) {
+                const areaRepository = await AppDataSource.getRepository(Area);
+                const area = await areaRepository.find({
+                    where: {
+                        Id: payload?.areaId
+                    }
+                });
+                account.areas = area;
+            }
             const accountRepository = await AppDataSource.getRepository(Account);
             const result = await accountRepository.save(account);
             const token = await encrypt.generateToken({
@@ -41,14 +51,19 @@ export class AccountService {
         try {
             console.log(`${AccountService.name} - fetchAllAccount - started`);
             const accountRepository = await AppDataSource.getRepository(Account);
-            const accounts = await accountRepository.find();
+            const accounts = await accountRepository.find({
+                relations: {
+                    areas: true
+                }
+            });
             return accounts.map(account => {
                 return {
                     id: account.Id,
                     fullName: account.fullName,
                     phone: account.phone,
                     role: account?.role ?? '',
-                    active: account.active
+                    active: account.active,
+                    areas: account?.areas
                 } as IAccount
             })
         } catch (error) {
@@ -84,12 +99,12 @@ export class AccountService {
             console.log(`${AccountService.name} - updateAccountStatus - started`);
             console.log(id, status);
             const accountRepository = await AppDataSource.getRepository(Account);
-            await accountRepository.update({
+            const account = await accountRepository.update({
                 Id: id
             }, {
-                active: Boolean(status)
+                active: status ?? true
             });
-            return true;
+            return account;
         } catch (error) {
             console.error(`${AccountService.name} - updateAccountStatus - Error: ${error}`);
             throw error;

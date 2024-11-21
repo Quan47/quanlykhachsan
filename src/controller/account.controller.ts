@@ -5,6 +5,7 @@ import { validate } from 'class-validator';
 import { AccountSignUpDto } from "../dto/account-signup.dto";
 import { plainToClass } from 'class-transformer';
 import { encrypt } from "../common/helpers";
+import { RoleID } from "../interface/account.interface";
 
 
 export class AccountController {
@@ -26,19 +27,27 @@ export class AccountController {
                         })) ?? "Missing required parameters"
                     })
             } else {
-                const { fullName, phone, password, role } = req.body;
-                const account = await AccountService.createAccount({ fullName, phone, password, role });
-                const dataResponse = new AccountResponseDto();
-                dataResponse.fullName = fullName;
-                dataResponse.id = account.id;
-                res
-                    .status(201)
-                    .json(
-                        {
-                            message: "User created successfully",
-                            token: account.token,
-                            ...dataResponse
-                        });
+                const { fullName, phone, password, role, areaId } = req.body;
+                if (role === RoleID.LT && !areaId) {
+                    res
+                        .status(400)
+                        .json({
+                            errors: "Missing required areaId field"
+                        })
+                } else {
+                    const account = await AccountService.createAccount({ fullName, phone, password, role , areaId});
+                    const dataResponse = new AccountResponseDto();
+                    dataResponse.fullName = fullName;
+                    dataResponse.id = account.id;
+                    res
+                        .status(201)
+                        .json(
+                            {
+                                message: "User created successfully",
+                                token: account.token,
+                                ...dataResponse
+                            });
+                }
             }
         } catch (error) {
             console.error(`${AccountController.name} - signUp - Error: ${error}`);
