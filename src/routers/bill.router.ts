@@ -61,6 +61,38 @@ Router.post(
  *   get:
  *     summary: Get list of bill.
  *     description: Get list of bill.
+ *     parameters:
+ *         - in: query
+ *           name: filter
+ *           required: false
+ *           description: bill statistics
+ *           schema:
+ *              type: string
+ *              enum:
+ *                 - Month
+ *                 - Year
+ *         - in: query
+ *           name: month
+ *           required: false
+ *           description: month
+ *           schema:
+ *              type: string
+ *         - in: query
+ *           name: year
+ *           required: false
+ *           description: year
+ *           schema:
+ *              type: string
+ *         - in: query
+ *           name: area
+ *           required: false
+ *           description: area
+ *           schema:
+ *              type: string
+ *              enum:
+ *                 - A
+ *                 - B
+ *                 - C
  *     tags:
  *         - Bill
  *     responses:
