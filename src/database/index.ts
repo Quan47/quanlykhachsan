@@ -12,17 +12,17 @@ dotenv.config();
 
 const { SQL_HOST, SQL_PORT, SQL_USER_NAME, SQL_PASSWORD, SQL_DATABASE } = process.env;
 export const AppDataSource = new DataSource({
-  type: "mssql",
+  type: "mysql",
   host: `${SQL_HOST}`,
   port: Number(SQL_PORT),
   username: SQL_USER_NAME,
   password: SQL_PASSWORD,
   database: SQL_DATABASE,
-  // synchronize: true,
+  synchronize: true,
   //logging logs sql command on the treminal
   logging: false,
   entities: [Account, Area, Bill, Convenient, Renter, Role, Room, RoomType],
   migrations: [__dirname + "/migration/*.ts"],
   subscribers: [],
-  connectionTimeout: 100000
+  // connectionTimeout: 100000
 });
